@@ -1,0 +1,32 @@
+Phase 1 a Model Summary
+
+Call:
+lm(formula = NOX ~ AT + AP + AH + AFDP + GTEP + TIT + TAT + TEY + 
+    CDP, data = training)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-40.587  -3.533   0.096   2.963  45.226 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -1.103e+02  1.789e+01  -6.165 7.25e-10 ***
+AT          -1.733e+00  2.996e-02 -57.853  < 2e-16 ***
+AP          -2.608e-01  1.298e-02 -20.100  < 2e-16 ***
+AH          -2.920e-01  5.352e-03 -54.553  < 2e-16 ***
+AFDP         2.372e+00  1.248e-01  19.008  < 2e-16 ***
+GTEP        -3.408e+00  2.659e-01 -12.816  < 2e-16 ***
+TIT          1.716e+00  7.812e-02  21.968  < 2e-16 ***
+TAT         -1.938e+00  1.088e-01 -17.814  < 2e-16 ***
+TEY         -1.870e+00  7.812e-02 -23.935  < 2e-16 ***
+CDP          1.773e+00  9.402e-01   1.886   0.0594 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 7.028 on 15029 degrees of freedom
+Multiple R-squared:  0.5497,	Adjusted R-squared:  0.5494 
+F-statistic:  2038 on 9 and 15029 DF,  p-value: < 2.2e-16
+
+
+Model Performance
+RMSE=10.628 R2=0.274542 MAE=7.68953 Spearman=0.495112

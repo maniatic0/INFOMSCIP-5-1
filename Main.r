@@ -4,6 +4,11 @@
 
 library("Hmisc");
 library("corrplot");
+library("caret");
+library("tidyverse");
+theme_set(theme_bw());
+
+printf <- function(...) writeLines(sprintf(...));
 
 # Load Data
 gt_2011 = read.csv("./pp_gas_emission/gt_2011.csv");
@@ -139,5 +144,51 @@ results_top_change[3, 4] = abs(results_top_change[3, 3]);
 
 # Save
 write.csv(results_top_change, "./part2/top_corr_change_2011_2015.csv");
+
+
+# Part 3 ------------------------------------------------------------------
+
+train_model <- function(training, validation, name)
+{
+  sink(file = sprintf("./part3/%s.txt", name));
+  linear_model = lm(
+    NOX ~ AT + AP + AH + AFDP + GTEP + TIT + TAT + TEY + CDP, 
+    data=training
+  );
+  # Model Summary
+  printf("%s Model Summary", name);
+  print(summary(linear_model));
+  # Make predictions
+  predictions = linear_model %>% predict(validation);
+  # Model performance
+  # (a) Prediction error, RMSE
+  rmse = RMSE(predictions, validation$NOX);
+  # (b) R-square
+  r2 = R2(predictions, validation$NOX);
+  # (c) MAE
+  mae = MAE(predictions, validation$NOX);
+  # (d) Correlation
+  corr = cor(predictions, validation$NOX, method = "spearman");
+  
+  printf("\nModel Performance");
+  printf("RMSE=%g R2=%g MAE=%g Spearman=%g", rmse, r2, mae, corr);
+  sink(file = NULL);
+};
+
+# Sets
+training = rbind(gt_2011, gt_2012);
+validation = gt_2013;
+training_validation = rbind(training, validation);
+test = rbind(gt_2014, gt_2015);
+
+# Phase 1
+
+# a
+train_model(training, validation, "Phase 1 a");
+train_model(training_validation, test, "Phase 1 b");
+
+
+
+
 
 
