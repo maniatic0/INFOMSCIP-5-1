@@ -7,6 +7,7 @@ library("corrplot");
 library("caret");
 library("tidyverse");
 library("fastICA");
+library("dplyr");
 theme_set(theme_bw());
 
 printf <- function(...) writeLines(sprintf(...));
@@ -149,17 +150,8 @@ write.csv(results_top_change, "./part2/top_corr_change_2011_2015.csv");
 
 # Part 3 ------------------------------------------------------------------
 
-train_model <- function(formula, training, validation, name, filename)
+predict_model <- function(linear_model, validation)
 {
-  sink(file = sprintf("./part3/%s_measures.txt", filename));
-  linear_model = lm(
-    formula, 
-    data=training
-  );
-  # Model Summary
-  printf("%s Model Summary", name);
-  print(formula);
-  print(summary(linear_model));
   # Make predictions
   predictions = linear_model %>% predict(validation);
   # Model performance
@@ -174,7 +166,23 @@ train_model <- function(formula, training, validation, name, filename)
   
   printf("\nModel Performance");
   printf("RMSE=%g R2=%g MAE=%g Spearman=%g", rmse, r2, mae, corr);
+  return (predictions);
+}
+
+train_model <- function(formula, training, validation, name, filename)
+{
+  sink(file = sprintf("./part3/%s_measures.txt", filename));
+  linear_model = lm(
+    formula, 
+    data=training
+  );
+  # Model Summary
+  printf("%s Model Summary", name);
+  print(formula);
+  print(summary(linear_model));
+  predict_model(linear_model, validation);
   sink(file = NULL);
+  return(linear_model);
 };
 
 # Paper Sets
@@ -202,7 +210,7 @@ train_model(total_model, training_validation, test, "Phase 1 b", "phase_1_b");
 
 nox_col = which(names(training) == "NOX");
 
-our_model = NOX ~ .;
+our_model_formula = NOX ~ .;
 preProcObj = preProcess(training[,-nox_col], method = c("center", "scale", "YeoJohnson", "ica", "spatialSign"), n.comp=8, outcome=training$NOX);
 
 printModel = function(preprocObj, name){
@@ -228,10 +236,99 @@ prepareData <- function(preprocObj, data)
   new_data
 };
 
+weight_visualize <- function(preprocObj, data, zero, linear_model, name, filename)
+{
+  heights = data.frame(matrix(ncol = length(colnames(data)), nrow = 1));
+  colnames(heights) = colnames(data);
+  heights[1, ] = 0;
+  
+  for(i in 1:(length(colnames(heights))-1))
+  {
+    d = data.frame(matrix(ncol = length(colnames(data)), nrow = 1));
+    colnames(d) = colnames(data);
+    
+    for(j in 1:length(colnames(heights)))
+    {
+      if (i != j)
+      {
+        d[1,j] = zero[1,j];
+      }
+      else
+      {
+        d[1,j] = data[1,j];
+      }
+    }
+    
+    pD = prepareData(preprocObj, d);
+    
+    heights[1,i] = linear_model %>% predict(pD);
+    
+  }
+  
+  pData = prepareData(preprocObj, zero);
+  heights[1,length(colnames(heights))] = linear_model %>% predict(pData);
+  colnames(heights)[nox_col] = "W0";
+  
+  png(sprintf("./part3/%s_weights.png", filename));
+  barplot(
+    as.matrix(heights[order(heights,decreasing = TRUE)]), 
+    las=2, 
+    main=sprintf("Weight Visualization%s", name), 
+    ylim=c(0, max(heights)*1.2)
+    );
+  dev.off();
+  
+  # See https://topepo.github.io/caret/variable-importance.html
+  imp = varImp(linear_model, scale=FALSE);
+  png(sprintf("./part3/%s_importance.png", filename));
+  barplot(
+    t(as.matrix(
+      imp[order(imp$Overall,decreasing = TRUE),])
+      ),
+    names.arg = rownames(imp)[order(imp$Overall,decreasing = TRUE)],
+    las=2, 
+    main=sprintf("Importance Visualization%s", name),
+    ylim=c(0, max(imp$Overall)*1.2),
+    sub = "The absolute value of the t-statistic for each model parameter"
+    );
+  dev.off();
+  
+  return(heights);
+};
+
 training_prep = prepareData(preProcObj, training);
 validation_prep = prepareData(preProcObj, validation);
-train_model(our_model, training_prep, validation_prep, "Our Model", "our_model");
+test_prep = prepareData(preProcObj, test);
+our_model = train_model(our_model_formula, training_prep, validation_prep, "Our Model", "our_model");
 
+# Weight Visualization
+ones = data.frame(matrix(ncol = length(colnames(training)), nrow = 1));
+colnames(ones) = colnames(training);
+ones[1, ] = sapply(training, sd) + sapply(training, mean);
 
+zeros = data.frame(matrix(ncol = length(colnames(training)), nrow = 1));
+colnames(zeros) = colnames(training);
+zeros[1, ] = sapply(training, mean);
+
+weight_visualize(preProcObj, ones, zeros, our_model, " Our Model", "our_model");
+
+# Probes
+
+probes_model <- function (linear_model, preprocObj, test, n, filename)
+{
+  sink(file = sprintf("./part3/%s_probes_%d.txt", filename, n));
+  probes = sample_n(test, n);
+  probes_prep = prepareData(preprocObj, probes);
+  predictions = predict_model(linear_model, probes_prep);
+  printf("\nProbes");
+  data_to_show = cbind(probes, predictions, probes$NOX - predictions);
+  colnames(data_to_show)[length(colnames(data_to_show))-1] = "Prediction";
+  colnames(data_to_show)[length(colnames(data_to_show))] = "Error";
+  print(data_to_show);
+  sink(file = NULL);
+  write.csv(data_to_show, sprintf("./part3/%s_probes_%d.csv", filename, n));
+}
+
+probes_model(our_model, preProcObj, test, 2, "our_model");
 
 
