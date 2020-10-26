@@ -6,6 +6,7 @@ library("Hmisc");
 library("corrplot");
 library("caret");
 library("tidyverse");
+library("fastICA");
 theme_set(theme_bw());
 
 printf <- function(...) writeLines(sprintf(...));
@@ -148,15 +149,16 @@ write.csv(results_top_change, "./part2/top_corr_change_2011_2015.csv");
 
 # Part 3 ------------------------------------------------------------------
 
-train_model <- function(training, validation, name)
+train_model <- function(formula, training, validation, name, filename)
 {
-  sink(file = sprintf("./part3/%s.txt", name));
+  sink(file = sprintf("./part3/%s_measures.txt", filename));
   linear_model = lm(
-    NOX ~ AT + AP + AH + AFDP + GTEP + TIT + TAT + TEY + CDP, 
+    formula, 
     data=training
   );
   # Model Summary
   printf("%s Model Summary", name);
+  print(formula);
   print(summary(linear_model));
   # Make predictions
   predictions = linear_model %>% predict(validation);
@@ -175,19 +177,60 @@ train_model <- function(training, validation, name)
   sink(file = NULL);
 };
 
-# Sets
-training = rbind(gt_2011, gt_2012);
-validation = gt_2013;
+# Paper Sets
+training = subset(rbind(gt_2011, gt_2012), select = -CO);
+validation = subset(gt_2013, select = -CO);
 training_validation = rbind(training, validation);
-test = rbind(gt_2014, gt_2015);
+test = subset(rbind(gt_2014, gt_2015), select = -CO);
 
 # Phase 1
 
+total_model = NOX ~ AT + AP + AH + AFDP + GTEP + TIT + TAT + TEY + CDP
+
 # a
-train_model(training, validation, "Phase 1 a");
-train_model(training_validation, test, "Phase 1 b");
+train_model(total_model, training, validation, "Phase 1 a", "phase_1_a");
+
+# b
+train_model(total_model, training_validation, test, "Phase 1 b", "phase_1_b");
+
+# Phase 2
+
+# center, scale = Standardize data
+# YeoJhonson = https://en.wikipedia.org/wiki/Power_transform#Yeo%E2%80%93Johnson_transformation
+# ICA = https://en.wikipedia.org/wiki/Independent_component_analysis
+# Spatial Sign = Project Everything to a Unit Sphere https://pubs.acs.org/doi/10.1021/ci050498u
+
+nox_col = which(names(training) == "NOX");
+
+our_model = NOX ~ .;
+preProcObj = preProcess(training[,-nox_col], method = c("center", "scale", "YeoJohnson", "ica", "spatialSign"), n.comp=8, outcome=training$NOX);
+
+printModel = function(preprocObj, name){
+  sink(file = name);
+  printf("Our Model\n");
+  printf("Summary");
+  print(preProcObj);
+  printf("\nMeans");
+  print(preProcObj$mean);
+  printf("\nStandard Deviation");
+  print(preProcObj$std);
+  printf("\nICA");
+  print(preProcObj$ica);
+  sink(file = NULL);
+}
+printModel(preProcObj, "./part3/our_model_info.txt");
 
 
+prepareData <- function(preprocObj, data)
+{
+  new_data = cbind(predict(preprocObj, data[,-nox_col]), data$NOX);
+  colnames(new_data)[dim(new_data)[2]] = "NOX";
+  new_data
+};
+
+training_prep = prepareData(preProcObj, training);
+validation_prep = prepareData(preProcObj, validation);
+train_model(our_model, training_prep, validation_prep, "Our Model", "our_model");
 
 
 

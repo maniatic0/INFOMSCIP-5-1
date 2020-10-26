@@ -1,8 +1,8 @@
 Phase 1 b Model Summary
+NOX ~ AT + AP + AH + AFDP + GTEP + TIT + TAT + TEY + CDP
 
 Call:
-lm(formula = NOX ~ AT + AP + AH + AFDP + GTEP + TIT + TAT + TEY + 
-    CDP, data = training)
+lm(formula = formula, data = training)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
