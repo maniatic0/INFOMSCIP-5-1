@@ -41,7 +41,7 @@ Linear Hypotheses:
 original_online - original_offline == 0   1.5575     0.1233  12.635   <0.001 ***
 ours_offline - original_offline == 0      1.2160     0.1233   9.864   <0.001 ***
 ours_online - original_offline == 0       2.1523     0.1233  17.459   <0.001 ***
-ours_offline - original_online == 0      -0.3416     0.1233  -2.771   0.0286 *  
+ours_offline - original_online == 0      -0.3416     0.1233  -2.771   0.0283 *  
 ours_online - original_online == 0        0.5948     0.1233   4.825   <0.001 ***
 ours_online - ours_offline == 0           0.9363     0.1233   7.595   <0.001 ***
 ---

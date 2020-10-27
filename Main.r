@@ -237,46 +237,31 @@ prepareData <- function(preprocObj, data)
   new_data
 };
 
-weight_visualize <- function(preprocObj, data, zero, linear_model, name, filename)
+weight_visualize <- function(preprocObj, linear_model, training, name, filename)
 {
-  heights = data.frame(matrix(ncol = length(colnames(data)), nrow = 1));
-  colnames(heights) = colnames(data);
-  heights[1, ] = 0;
-  
-  for(i in 1:(length(colnames(heights))-1))
-  {
-    d = data.frame(matrix(ncol = length(colnames(data)), nrow = 1));
-    colnames(d) = colnames(data);
-    
-    for(j in 1:length(colnames(heights)))
-    {
-      if (i != j)
-      {
-        d[1,j] = zero[1,j];
-      }
-      else
-      {
-        d[1,j] = data[1,j];
-      }
-    }
-    
-    pD = prepareData(preprocObj, d);
-    
-    heights[1,i] = linear_model %>% predict(pD);
-    
-  }
-  
-  pData = prepareData(preprocObj, zero);
-  heights[1,length(colnames(heights))] = linear_model %>% predict(pData);
-  colnames(heights)[nox_col] = "W0";
   
   png(sprintf("./part3/%s_weights.png", filename));
   barplot(
-    as.matrix(heights[order(heights,decreasing = TRUE)]), 
+    t(as.matrix(linear_model$coefficients)), 
     las=2, 
     main=sprintf("Weight Visualization%s", name), 
-    ylim=c(0, max(heights)*1.2)
+    sub = "Note that the non-ica parameters are spatial sign processed",
+    ylim=c(min(linear_model$coefficients)*1.2, max(linear_model$coefficients)*1.2)
     );
+  dev.off();
+  
+  orig = preprocObj$ica$K %*% preprocObj$ica$W %*% our_model$coefficients[11:18];
+  orig = t(orig);
+  colnames(orig) = colnames(training)[1:9];
+  
+  png(sprintf("./part3/%s_ica_weights.png", filename));
+  barplot(
+    orig, 
+    las=2, 
+    main=sprintf("ICA Weight Visualization%s", name), 
+    sub="Original Features",
+    ylim=c(min(orig)*1.2, max(orig)*1.2)
+  );
   dev.off();
   
   # See https://topepo.github.io/caret/variable-importance.html
@@ -294,7 +279,6 @@ weight_visualize <- function(preprocObj, data, zero, linear_model, name, filenam
     );
   dev.off();
   
-  return(heights);
 };
 
 training_prep = prepareData(preProcObj, training);
@@ -303,15 +287,8 @@ test_prep = prepareData(preProcObj, test);
 our_model = train_model(our_model_formula, training_prep, validation_prep, "Our Model", "our_model");
 
 # Weight Visualization
-ones = data.frame(matrix(ncol = length(colnames(training)), nrow = 1));
-colnames(ones) = colnames(training);
-ones[1, ] = sapply(training, sd) + sapply(training, mean);
 
-zeros = data.frame(matrix(ncol = length(colnames(training)), nrow = 1));
-colnames(zeros) = colnames(training);
-zeros[1, ] = sapply(training, mean);
-
-weight_visualize(preProcObj, ones, zeros, our_model, " Our Model", "our_model");
+weight_visualize(preProcObj, our_model, training, " Our Model", "our_model");
 
 # Probes
 
@@ -328,6 +305,39 @@ probes_model <- function (linear_model, preprocObj, test, n, filename)
   print(data_to_show);
   sink(file = NULL);
   write.csv(data_to_show, sprintf("./part3/%s_probes_%d.csv", filename, n));
+  
+  for (i in 1:n) {
+    
+    multi = linear_model$coefficients * cbind(1, probes_prep[i, 1:(ncol(probes_prep)-1)]);
+    
+    multi = cbind(multi, predictions[i], probes$NOX[i]);
+    colnames(multi)[1] = "(Intercept)";
+    colnames(multi)[19:20] = cbind("Prediction", "Real");
+    
+    png(sprintf("./part3/%s_probe_%d_weights.png", filename, i));
+    barplot(
+      as.matrix(multi), 
+      las=2, 
+      main=sprintf("Probe %d Weight Visualization", i), 
+      sub = "Note that the non-ica parameters are spatial sign processed",
+      ylim=c(min(multi)*1.2, max(multi)*1.2)
+    );
+    dev.off();
+    
+    orig = preprocObj$ica$K %*% preprocObj$ica$W %*% t(as.matrix(multi[11:18]));
+    orig = t(orig);
+    colnames(orig) = colnames(test)[1:9];
+    
+    png(sprintf("./part3/%s_probe_%d_ica_weights.png", filename, i));
+    barplot(
+      orig, 
+      las=2, 
+      main=sprintf("Probe %d ICA Weight Visualization", i), 
+      sub="Original Features",
+      ylim=c(min(orig)*1.2, max(orig)*1.2)
+    );
+    dev.off();
+  }
 }
 
 probes_model(our_model, preProcObj, test, 2, "our_model");
