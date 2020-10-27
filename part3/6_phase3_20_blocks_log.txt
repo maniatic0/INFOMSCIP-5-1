@@ -1,0 +1,216 @@
+
+
+Online Tests
+
+Our Model Online
+
+Model Performance
+RMSE=21.9594 R2=0.112147 MAE=18.8325 Spearman=0.366089
+
+Original Model Online
+
+Model Performance
+RMSE=13.1584 R2=0.00631588 MAE=9.64671 Spearman=0.213763
+
+Our Model Online
+
+Model Performance
+RMSE=10.3516 R2=0.290539 MAE=8.69517 Spearman=0.60403
+
+Original Model Online
+
+Model Performance
+RMSE=8.75671 R2=0.0996706 MAE=7.85059 Spearman=0.424753
+
+Our Model Online
+
+Model Performance
+RMSE=15.7408 R2=0.00337168 MAE=13.3699 Spearman=-0.0307926
+
+Original Model Online
+
+Model Performance
+RMSE=10.8176 R2=0.00342622 MAE=8.7707 Spearman=0.00426935
+
+Our Model Online
+
+Model Performance
+RMSE=5.1051 R2=0.259546 MAE=4.03779 Spearman=0.319108
+
+Original Model Online
+
+Model Performance
+RMSE=4.14303 R2=0.393518 MAE=2.88338 Spearman=0.691873
+
+Our Model Online
+
+Model Performance
+RMSE=6.1106 R2=0.341511 MAE=5.15949 Spearman=0.600167
+
+Original Model Online
+
+Model Performance
+RMSE=6.82163 R2=0.0117635 MAE=5.73595 Spearman=0.0290223
+
+Our Model Online
+
+Model Performance
+RMSE=8.05874 R2=0.0413428 MAE=6.23278 Spearman=0.155507
+
+Original Model Online
+
+Model Performance
+RMSE=8.29352 R2=0.000409643 MAE=6.96457 Spearman=-0.0471041
+
+Our Model Online
+
+Model Performance
+RMSE=4.24783 R2=0.43014 MAE=3.26349 Spearman=0.664232
+
+Original Model Online
+
+Model Performance
+RMSE=4.92302 R2=0.196226 MAE=4.28823 Spearman=0.410548
+
+Our Model Online
+
+Model Performance
+RMSE=4.61588 R2=0.246706 MAE=3.85911 Spearman=0.398779
+
+Original Model Online
+
+Model Performance
+RMSE=2.86144 R2=0.638498 MAE=2.24335 Spearman=0.657186
+
+Our Model Online
+
+Model Performance
+RMSE=8.41769 R2=0.500517 MAE=6.12067 Spearman=0.668331
+
+Original Model Online
+
+Model Performance
+RMSE=8.26135 R2=0.37478 MAE=5.66039 Spearman=0.715429
+
+Our Model Online
+
+Model Performance
+RMSE=10.4014 R2=0.564079 MAE=8.24559 Spearman=0.611126
+
+Original Model Online
+
+Model Performance
+RMSE=10.1325 R2=0.479744 MAE=7.44871 Spearman=0.59143
+
+Our Model Online
+
+Model Performance
+RMSE=10.7972 R2=0.335102 MAE=8.06412 Spearman=0.413181
+
+Original Model Online
+
+Model Performance
+RMSE=11.0602 R2=0.276804 MAE=8.23239 Spearman=0.485821
+
+Our Model Online
+
+Model Performance
+RMSE=6.50803 R2=0.607877 MAE=5.04075 Spearman=0.726864
+
+Original Model Online
+
+Model Performance
+RMSE=6.3484 R2=0.637482 MAE=4.489 Spearman=0.826748
+
+Our Model Online
+
+Model Performance
+RMSE=7.47456 R2=0.487691 MAE=5.98357 Spearman=0.692048
+
+Original Model Online
+
+Model Performance
+RMSE=6.7953 R2=0.454277 MAE=4.70626 Spearman=0.723919
+
+Our Model Online
+
+Model Performance
+RMSE=9.96892 R2=0.137554 MAE=8.58363 Spearman=0.173378
+
+Original Model Online
+
+Model Performance
+RMSE=6.4957 R2=0.174173 MAE=5.28069 Spearman=0.253771
+
+Our Model Online
+
+Model Performance
+RMSE=10.324 R2=0.0632063 MAE=8.72676 Spearman=0.205709
+
+Original Model Online
+
+Model Performance
+RMSE=5.53658 R2=0.252241 MAE=4.65392 Spearman=0.504323
+
+Our Model Online
+
+Model Performance
+RMSE=7.65639 R2=0.0539433 MAE=6.09577 Spearman=-0.237433
+
+Original Model Online
+
+Model Performance
+RMSE=6.38539 R2=0.10991 MAE=5.25747 Spearman=-0.371974
+
+Our Model Online
+
+Model Performance
+RMSE=5.80031 R2=0.0116145 MAE=4.1594 Spearman=0.161073
+
+Original Model Online
+
+Model Performance
+RMSE=5.52107 R2=0.0145419 MAE=4.32269 Spearman=0.101653
+
+Our Model Online
+
+Model Performance
+RMSE=9.55352 R2=0.173723 MAE=8.18452 Spearman=0.309518
+
+Original Model Online
+
+Model Performance
+RMSE=10.8558 R2=0.160615 MAE=9.94368 Spearman=0.338659
+
+Our Model Online
+
+Model Performance
+RMSE=9.25428 R2=0.694947 MAE=8.00009 Spearman=0.794528
+
+Original Model Online
+
+Model Performance
+RMSE=11.7048 R2=0.473392 MAE=10.2979 Spearman=0.854765
+
+Our Model Online
+
+Model Performance
+RMSE=12.3596 R2=0.529964 MAE=10.8638 Spearman=0.643388
+
+Original Model Online
+
+Model Performance
+RMSE=12.7448 R2=0.405084 MAE=11.1633 Spearman=0.606757
+
+
+Offline Tests
+
+Our Model Offline
+
+Model Performance
+RMSE=22.1454 R2=0.488145 MAE=19.4346 Spearman=0.677872
+
+Original Model Offline
+
+Model Performance
+RMSE=10.2608 R2=0.437 MAE=8.24245 Spearman=0.692178

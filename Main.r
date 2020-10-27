@@ -8,6 +8,7 @@ library("caret");
 library("tidyverse");
 library("fastICA");
 library("dplyr");
+library("multcomp");
 theme_set(theme_bw());
 
 printf <- function(...) writeLines(sprintf(...));
@@ -193,13 +194,13 @@ test = subset(rbind(gt_2014, gt_2015), select = -CO);
 
 # Phase 1
 
-total_model = NOX ~ AT + AP + AH + AFDP + GTEP + TIT + TAT + TEY + CDP
+total_model_formula = NOX ~ AT + AP + AH + AFDP + GTEP + TIT + TAT + TEY + CDP
 
 # a
-train_model(total_model, training, validation, "Phase 1 a", "phase_1_a");
+train_model(total_model_formula, training, validation, "Phase 1 a", "phase_1_a");
 
 # b
-train_model(total_model, training_validation, test, "Phase 1 b", "phase_1_b");
+train_model(total_model_formula, training_validation, test, "Phase 1 b", "phase_1_b");
 
 # Phase 2
 
@@ -331,4 +332,140 @@ probes_model <- function (linear_model, preprocObj, test, n, filename)
 
 probes_model(our_model, preProcObj, test, 2, "our_model");
 
+# Phase 3
+
+measure_model <- function(linear_model, validation)
+{
+  # Make predictions
+  predictions = linear_model %>% predict(validation);
+  # Model performance
+  # (a) Prediction error, RMSE
+  rmse = RMSE(predictions, validation$NOX);
+  # (b) R-square
+  r2 = R2(predictions, validation$NOX);
+  # (c) MAE
+  mae = MAE(predictions, validation$NOX);
+  # (d) Correlation
+  corr = cor(predictions, validation$NOX, method = "spearman");
+  
+  printf("\nModel Performance");
+  printf("RMSE=%g R2=%g MAE=%g Spearman=%g", rmse, r2, mae, corr);
+  return (c(rmse, r2, mae, corr));
+}
+
+
+create_blocks <- function(data, block_size)
+{
+  n = nrow(data);
+  r = rep(1:block_size,each=ceiling(n/block_size))[1:n];
+  split(data,r)
+}
+
+
+compare_models <- function(training, validation, block_size, filename)
+{
+  trainData = training;
+  blocks = create_blocks(validation, block_size);
+  
+  cnames = c("Type", "RMSE", "R2", "MAE", "Spearman");
+  measures = data.frame(matrix(ncol = length(cnames), nrow = 0));
+  colnames(measures) = cnames;
+  
+  preds = c();
+  preds = as.data.frame(preds);
+  
+  sink(file = sprintf("./part3/%s_phase3_%d_blocks_log.txt", filename, block_size));
+  printf("\n\nOnline Tests");
+  for (i in 1:length(blocks)) {
+    block = blocks[[i]];
+    
+    preProcObj = preProcess(trainData[,-nox_col], method = c("center", "scale", "YeoJohnson", "ica", "spatialSign"), n.comp=8, outcome=trainData$NOX);
+    
+    tData = prepareData(preProcObj, trainData);
+    vData = prepareData(preProcObj, block);
+    
+    our_model = lm(
+      our_model_formula, 
+      data=tData
+    );
+    
+    preds = rbind(preds, cbind("ours_online", our_model %>% predict(vData)));
+    printf("\nOur Model Online");
+    measures = rbind(measures, c("ours_online", measure_model(our_model, vData)));
+    colnames(measures) = cnames;
+    
+    original_model = lm(
+      total_model_formula, 
+      data=trainData
+    );
+    
+    preds = rbind(preds, cbind("original_online",original_model %>% predict(block)));
+    printf("\nOriginal Model Online");
+    measures = rbind(measures, c("original_online", measure_model(original_model, block)));
+    colnames(measures) = cnames;
+    
+    trainData = rbind(trainData, block);
+  }
+  
+  {
+    printf("\n\nOffline Tests");
+    preProcObj = preProcess(training[,-nox_col], method = c("center", "scale", "YeoJohnson", "ica", "spatialSign"), n.comp=8, outcome=training$NOX);
+    
+    tData = prepareData(preProcObj, training);
+    vData = prepareData(preProcObj, validation);
+    
+    our_model = lm(
+      our_model_formula, 
+      data=tData
+    );
+    
+    preds = rbind(preds, cbind("ours_offline", our_model %>% predict(vData)));
+    printf("\nOur Model Offline");
+    measures = rbind(measures, c("ours_offline", measure_model(our_model, vData)));
+    colnames(measures) = cnames;
+    
+    original_model = lm(
+      total_model_formula, 
+      data=training
+    );
+    
+    preds = rbind(preds, cbind("original_offline",original_model %>% predict(validation)));
+    printf("\nOriginal Model Offline");
+    measures = rbind(measures, c("original_offline", measure_model(original_model, validation)));
+    colnames(measures) = cnames;
+  }
+  
+  
+  sink(file = NULL);
+  
+  sink(file = sprintf("./part3/%s_phase3_%d_blocks.txt", filename, block_size));
+  
+  printf("T Test Between Pearson Correlations of Original Model and Our Model Online");
+  print(
+    t.test(
+      as.numeric(measures[which(measures$Type == "original_online"),]$Spearman), 
+      as.numeric(measures[which(measures$Type == "ours_online"),]$Spearman)
+    )
+  );
+  
+  colnames(preds) = c("Type", "Predictions");
+  preds$Predictions = as.numeric(preds$Predictions);
+  preds$Type = factor(preds$Type);
+  
+  printf("\nANOVA Test Between Predictions of the Original Model Online, Our Model Online, Original Model Offline, and Our Model Offilne");
+  anova = aov(Predictions ~ Type, data=preds);
+  print(anova)
+  print(summary(anova))
+  # Check https://en.wikipedia.org/wiki/Tukey%27s_range_test
+  print(summary(glht(anova, linfct = mcp(Type = "Tukey"))))
+  
+  sink(file = NULL);
+  
+  write.csv(measures, sprintf("./part3/%s_phase3_%d_blocks_measurments.csv", filename, block_size));
+  
+  measures
+}
+
+compare_models(training, validation, 10, "1_5");
+compare_models(training_validation, test, 20, "6");
 

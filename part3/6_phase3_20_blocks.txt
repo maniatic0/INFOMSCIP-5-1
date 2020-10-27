@@ -1,0 +1,50 @@
+T Test Between Pearson Correlations of Original Model and Our Model Online
+
+	Welch Two Sample t-test
+
+data:  as.numeric(measures[which(measures$Type == "original_online"), ]$Spearman) and as.numeric(measures[which(measures$Type == "ours_online"), ]$Spearman)
+t = -0.11518, df = 36.969, p-value = 0.9089
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.2075067  0.1851849
+sample estimates:
+mean of x mean of y 
+0.4007806 0.4119415 
+
+
+ANOVA Test Between Predictions of the Original Model Online, Our Model Online, Original Model Offline, and Our Model Offilne
+Call:
+   aov(formula = Predictions ~ Type, data = preds)
+
+Terms:
+                   Type Residuals
+Sum of Squares  2267226   8116823
+Deg. of Freedom       3     58164
+
+Residual standard error: 11.81316
+Estimated effects may be unbalanced
+               Df  Sum Sq Mean Sq F value Pr(>F)    
+Type            3 2267226  755742    5416 <2e-16 ***
+Residuals   58164 8116823     140                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+	 Simultaneous Tests for General Linear Hypotheses
+
+Multiple Comparisons of Means: Tukey Contrasts
+
+
+Fit: aov(formula = Predictions ~ Type, data = preds)
+
+Linear Hypotheses:
+                                        Estimate Std. Error t value Pr(>|t|)    
+original_online - original_offline == 0  -2.5668     0.1385 -18.528  < 0.001 ***
+ours_offline - original_offline == 0     13.2298     0.1385  95.496  < 0.001 ***
+ours_online - original_offline == 0      -0.4775     0.1385  -3.447  0.00328 ** 
+ours_offline - original_online == 0      15.7966     0.1385 114.024  < 0.001 ***
+ours_online - original_online == 0        2.0893     0.1385  15.081  < 0.001 ***
+ours_online - ours_offline == 0         -13.7073     0.1385 -98.943  < 0.001 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+(Adjusted p values reported -- single-step method)
+
