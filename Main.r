@@ -399,7 +399,7 @@ compare_models <- function(training, validation, block_size, filename)
       data=tData
     );
     
-    preds = rbind(preds, cbind("ours_online", our_model %>% predict(vData)));
+    preds = rbind(preds, cbind("ours_online", abs(vData$NOX - (our_model %>% predict(vData))) ));
     printf("\nOur Model Online");
     measures = rbind(measures, c("ours_online", measure_model(our_model, vData)));
     colnames(measures) = cnames;
@@ -409,7 +409,7 @@ compare_models <- function(training, validation, block_size, filename)
       data=trainData
     );
     
-    preds = rbind(preds, cbind("original_online",original_model %>% predict(block)));
+    preds = rbind(preds, cbind("original_online", abs(block$NOX - (original_model %>% predict(block)))     ));
     printf("\nOriginal Model Online");
     measures = rbind(measures, c("original_online", measure_model(original_model, block)));
     colnames(measures) = cnames;
@@ -429,7 +429,7 @@ compare_models <- function(training, validation, block_size, filename)
       data=tData
     );
     
-    preds = rbind(preds, cbind("ours_offline", our_model %>% predict(vData)));
+    preds = rbind(preds, cbind("ours_offline", abs(vData$NOX - (our_model %>% predict(vData)))   ));
     printf("\nOur Model Offline");
     measures = rbind(measures, c("ours_offline", measure_model(our_model, vData)));
     colnames(measures) = cnames;
@@ -439,7 +439,7 @@ compare_models <- function(training, validation, block_size, filename)
       data=training
     );
     
-    preds = rbind(preds, cbind("original_offline",original_model %>% predict(validation)));
+    preds = rbind(preds, cbind("original_offline",abs(validation$NOX - (original_model %>% predict(validation)))));
     printf("\nOriginal Model Offline");
     measures = rbind(measures, c("original_offline", measure_model(original_model, validation)));
     colnames(measures) = cnames;
@@ -458,16 +458,20 @@ compare_models <- function(training, validation, block_size, filename)
     )
   );
   
-  colnames(preds) = c("Type", "Predictions");
-  preds$Predictions = as.numeric(preds$Predictions);
+  colnames(preds) = c("Type", "Abs_Error");
+  preds$Abs_Error = as.numeric(preds$Abs_Error);
   preds$Type = factor(preds$Type);
   
-  printf("\nANOVA Test Between Predictions of the Original Model Online, Our Model Online, Original Model Offline, and Our Model Offilne");
-  anova = aov(Predictions ~ Type, data=preds);
+  printf("\nANOVA Test Between Abs_Error of the Original Model Online, Our Model Online, Original Model Offline, and Our Model Offilne");
+  anova = aov(Abs_Error ~ Type, data=preds);
   print(anova)
   print(summary(anova))
   # Check https://en.wikipedia.org/wiki/Tukey%27s_range_test
   print(summary(glht(anova, linfct = mcp(Type = "Tukey"))))
+  
+  print("\nMAE")
+  r1 = by(preds$Abs_Error, preds$Type, mean);
+  print(r1[order(r1)])
   
   sink(file = NULL);
   

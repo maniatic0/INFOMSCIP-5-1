@@ -12,20 +12,20 @@ mean of x mean of y
 0.2724721 0.4102892 
 
 
-ANOVA Test Between Predictions of the Original Model Online, Our Model Online, Original Model Offline, and Our Model Offilne
+ANOVA Test Between Abs_Error of the Original Model Online, Our Model Online, Original Model Offline, and Our Model Offilne
 Call:
-   aov(formula = Predictions ~ Type, data = preds)
+   aov(formula = Abs_Error ~ Type, data = preds)
 
 Terms:
                      Type Residuals
-Sum of Squares    17672.1 1554387.6
+Sum of Squares     8720.7 1147643.4
 Deg. of Freedom         3     28604
 
-Residual standard error: 7.371677
+Residual standard error: 6.334176
 Estimated effects may be unbalanced
                Df  Sum Sq Mean Sq F value Pr(>F)    
-Type            3   17672    5891   108.4 <2e-16 ***
-Residuals   28604 1554388      54                   
+Type            3    8721  2906.9   72.45 <2e-16 ***
+Residuals   28604 1147643    40.1                   
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
@@ -34,17 +34,21 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 Multiple Comparisons of Means: Tukey Contrasts
 
 
-Fit: aov(formula = Predictions ~ Type, data = preds)
+Fit: aov(formula = Abs_Error ~ Type, data = preds)
 
 Linear Hypotheses:
                                         Estimate Std. Error t value Pr(>|t|)    
-original_online - original_offline == 0   1.5575     0.1233  12.635   <0.001 ***
-ours_offline - original_offline == 0      1.2160     0.1233   9.864   <0.001 ***
-ours_online - original_offline == 0       2.1523     0.1233  17.459   <0.001 ***
-ours_offline - original_online == 0      -0.3416     0.1233  -2.771   0.0283 *  
-ours_online - original_online == 0        0.5948     0.1233   4.825   <0.001 ***
-ours_online - ours_offline == 0           0.9363     0.1233   7.595   <0.001 ***
+original_online - original_offline == 0  -0.1445     0.1059  -1.364    0.522    
+ours_offline - original_offline == 0     -1.1391     0.1059 -10.754   <1e-04 ***
+ours_online - original_offline == 0      -1.2026     0.1059 -11.353   <1e-04 ***
+ours_offline - original_online == 0      -0.9946     0.1059  -9.390   <1e-04 ***
+ours_online - original_online == 0       -1.0581     0.1059  -9.989   <1e-04 ***
+ours_online - ours_offline == 0          -0.0635     0.1059  -0.599    0.932    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 (Adjusted p values reported -- single-step method)
 
+[1] "\nMAE"
+preds$Type
+     ours_online     ours_offline  original_online original_offline 
+        6.486951         6.550446         7.545035         7.689527 
